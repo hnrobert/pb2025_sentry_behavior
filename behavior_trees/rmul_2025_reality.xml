@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4">
+  <BehaviorTree ID="check_game_start">
+    <Fallback>
+      <IsGameStatus name="IsGameStart"
+                    max_remain_time="420"
+                    min_remain_time="0"
+                    expected_game_progress="4"
+                    key_port="{@referee_gameStatus}"/>
+      <ForceFailure>
+        <Sequence>
+          <PublishSpinSpeed spin_speed="0.0"
+                            duration="0.0"
+                            topic_name="cmd_spin"/>
+          <PublishTwist v_y="0.0"
+                        v_yaw="0.0"
+                        v_x="0.0"
+                        duration="0.0"
+                        topic_name="cmd_vel"/>
+        </Sequence>
+      </ForceFailure>
+    </Fallback>
+  </BehaviorTree>
+
+  <BehaviorTree ID="navigate_with_retreat">
+    <Fallback>
+      <Sequence>
+        <IsStatusOK ammo_min="0"
+                    heat_max="350"
+                    hp_min="200"
+                    key_port="{@referee_robotStatus}"/>
+        <NavigateGoalPose goal="1;0;0"
+                          topic_name="goal_pose"
+                          map_frame="map"
+                          base_frame="base_footprint"
+                          position_tolerance="0.25"
+                          yaw_tolerance="0.35"/>
+      </Sequence>
+      <Sequence>
+        <NavigateGoalPose goal="0;0;0"
+                          topic_name="goal_pose"
+                          map_frame="map"
+                          base_frame="base_footprint"
+                          position_tolerance="0.25"
+                          yaw_tolerance="0.35"/>
+        <Sleep msec="10000"/>
+        <NavigateGoalPose goal="1;0;0"
+                          topic_name="goal_pose"
+                          map_frame="map"
+                          base_frame="base_footprint"
+                          position_tolerance="0.25"
+                          yaw_tolerance="0.35"/>
+      </Sequence>
+    </Fallback>
+  </BehaviorTree>
+
+  <BehaviorTree ID="rmul_2025_reality">
+    <KeepRunningUntilFailure>
+      <ForceSuccess>
+        <ReactiveSequence>
+          <SubTree ID="check_game_start"/>
+          <PublishSpinSpeed spin_speed="7.0"
+                            duration="0.0"
+                            topic_name="cmd_spin"/>
+          <SubTree ID="navigate_with_retreat"/>
+        </ReactiveSequence>
+      </ForceSuccess>
+    </KeepRunningUntilFailure>
+  </BehaviorTree>
+</root>

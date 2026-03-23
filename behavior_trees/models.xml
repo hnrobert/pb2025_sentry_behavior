@@ -22,6 +22,10 @@
             <input_port name="expected_game_progress" type="int" default="4">Expected game progress stage</input_port>
             <input_port name="key_port" type="pb_rm_interfaces::msg::GameStatus_&lt;std::allocator&lt;void&gt; &gt;" default="{@referee_gameStatus}">GameStatus port on blackboard</input_port>
         </Condition>
+        <Condition ID="IsManualStart">
+            <input_port name="start_value" type="int" default="1">Minimum value to trigger manual start</input_port>
+            <input_port name="key_port" type="std_msgs::msg::Int32_&lt;std::allocator&lt;void&gt; &gt;" default="{@manual_start}">Manual start port on blackboard</input_port>
+        </Condition>
         <Condition ID="IsRfidDetected">
             <input_port name="friendly_supply_zone_exchange" type="bool" default="false">己方与兑换区重叠的补给区</input_port>
             <input_port name="friendly_supply_zone_non_exchange" type="bool" default="false">己方与兑换区不重叠的补给区 / RMUL 补给区</input_port>
@@ -35,6 +39,15 @@
             <input_port name="hp_min" type="int" default="300">Minimum HP. NOTE: Sentry init/max HP is 400</input_port>
             <input_port name="key_port" type="pb_rm_interfaces::msg::RobotStatus_&lt;std::allocator&lt;void&gt; &gt;" default="{@referee_robotStatus}">RobotStatus port on blackboard</input_port>
         </Condition>
+        <Action ID="NavigateGoalPose">
+            <input_port name="goal" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;" default="0;0;0">Expected goal pose that send to nav2. Fill with format `x;y;yaw`</input_port>
+            <input_port name="map_frame" type="std::string" default="map">Map frame</input_port>
+            <input_port name="base_frame" type="std::string" default="base_footprint">Robot base frame</input_port>
+            <input_port name="yaw_tolerance" type="double" default="0.350000">Yaw tolerance in radians</input_port>
+            <input_port name="position_tolerance" type="double" default="0.250000">Position tolerance in meters</input_port>
+            <input_port name="duration" type="std::chrono::milliseconds" default="">Publish then sleep duration in milliseconds</input_port>
+            <input_port name="topic_name" type="std::string" default="__default__placeholder__">Topic name</input_port>
+        </Action>
         <Condition ID="PubNav2Goal">
             <input_port name="goal" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;" default="0;0;0">Expected goal pose that send to nav2. Fill with format `x;y;yaw`</input_port>
             <input_port name="topic_name" type="std::string" default="__default__placeholder__">Topic name</input_port>

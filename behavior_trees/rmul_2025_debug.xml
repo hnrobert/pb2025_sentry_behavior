@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4">
+  <BehaviorTree ID="debug_patrol_cycle">
+    <Sequence>
+      <NavigateGoalPose goal="1;1;0"
+                        topic_name="goal_pose"
+                        map_frame="map"
+                        base_frame="base_footprint"
+                        position_tolerance="0.25"
+                        yaw_tolerance="0.35"/>
+      <Sleep msec="15000"/>
+      <NavigateGoalPose goal="0;0;0"
+                        topic_name="goal_pose"
+                        map_frame="map"
+                        base_frame="base_footprint"
+                        position_tolerance="0.25"
+                        yaw_tolerance="0.35"/>
+      <Sleep msec="15000"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="rmul_2025_debug">
+    <KeepRunningUntilFailure>
+      <ForceSuccess>
+        <Sequence>
+          <IsManualStart key_port="{@manual_start}"
+                         start_value="1"/>
+          <Repeat num_cycles="-1">
+            <SubTree ID="debug_patrol_cycle"/>
+          </Repeat>
+        </Sequence>
+      </ForceSuccess>
+    </KeepRunningUntilFailure>
+  </BehaviorTree>
+</root>

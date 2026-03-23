@@ -51,12 +51,18 @@ list(APPEND plugin_libs is_attacked)
 ament_auto_add_library(is_detect_enemy SHARED plugins/condition/is_detect_enemy.cpp)
 list(APPEND plugin_libs is_detect_enemy)
 
+ament_auto_add_library(is_manual_start SHARED plugins/condition/is_manual_start.cpp)
+list(APPEND plugin_libs is_manual_start)
+
 ####### Actions #######
 ament_auto_add_library(send_nav2_goal SHARED plugins/action/send_nav2_goal.cpp)
 list(APPEND plugin_libs send_nav2_goal)
 
 ament_auto_add_library(pub_nav2_goal SHARED plugins/action/pub_nav2_goal.cpp)
 list(APPEND plugin_libs pub_nav2_goal)
+
+ament_auto_add_library(navigate_goal_pose SHARED plugins/action/navigate_goal_pose.cpp)
+list(APPEND plugin_libs navigate_goal_pose)
 
 ament_auto_add_library(pub_spin_speed SHARED plugins/action/pub_spin_speed.cpp)
 list(APPEND plugin_libs pub_spin_speed)
@@ -111,6 +117,11 @@ install(
   LIBRARY DESTINATION share/${PROJECT_NAME}/bt_plugins
   ARCHIVE DESTINATION share/${PROJECT_NAME}/bt_plugins
   RUNTIME DESTINATION share/${PROJECT_NAME}/bt_plugins
+)
+
+install(
+  PROGRAMS scripts/reality_referee_bridge.py
+  DESTINATION lib/${PROJECT_NAME}
 )
 
 ament_auto_package(

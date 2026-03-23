@@ -51,7 +51,7 @@
                             duration="0.0"
                             topic_name="cmd_spin"/>
           <SubTree ID="check_robot_status"/>
-          <PubNav2Goal goal="4.65;-3.5;0"
+          <PubNav2Goal goal="5.18;2.5;0"
                        topic_name="goal_pose"/>
         </ReactiveSequence>
       </ForceSuccess>
