@@ -79,6 +79,9 @@ list(APPEND plugin_libs pub_gimbal_velocity)
 ament_auto_add_library(calculate_attack_pose SHARED plugins/action/calculate_attack_pose.cpp)
 list(APPEND plugin_libs calculate_attack_pose)
 
+ament_auto_add_library(print_referee_status SHARED plugins/action/print_referee_status.cpp)
+list(APPEND plugin_libs print_referee_status)
+
 ####### Controls #######
 ament_auto_add_library(recovery_node SHARED plugins/control/recovery_node.cpp)
 list(APPEND plugin_libs recovery_node)
@@ -120,7 +123,7 @@ install(
 )
 
 install(
-  PROGRAMS scripts/reality_referee_bridge.py
+  PROGRAMS scripts/referee_topic_translator.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

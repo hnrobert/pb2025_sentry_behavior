@@ -3,7 +3,6 @@ import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, GroupAction, SetEnvironmentVariable
-from launch.conditions import IfCondition
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node, PushRosNamespace, SetRemap
 from launch_ros.descriptions import ParameterFile
@@ -17,8 +16,6 @@ def generate_launch_description():
     use_sim_time = LaunchConfiguration("use_sim_time")
     params_file = LaunchConfiguration("params_file")
     log_level = LaunchConfiguration("log_level")
-    start_referee_translator = LaunchConfiguration("start_referee_translator")
-    translator_input_prefix = LaunchConfiguration("translator_input_prefix")
 
     param_substitutions = {"use_sim_time": use_sim_time}
 
@@ -49,21 +46,11 @@ def generate_launch_description():
     )
     declare_params_file_cmd = DeclareLaunchArgument(
         "params_file",
-        default_value=os.path.join(bringup_dir, "params", "sentry_behavior_reality.yaml"),
+        default_value=os.path.join(bringup_dir, "params", "sentry_behavior_referee_test.yaml"),
         description="Full path to the ROS2 parameters file to use for all launched nodes",
     )
     declare_log_level_cmd = DeclareLaunchArgument(
         "log_level", default_value="info", description="log level"
-    )
-    declare_start_referee_translator_cmd = DeclareLaunchArgument(
-        "start_referee_translator",
-        default_value="false",
-        description="Start the referee topic translator (dji String -> pb_rm_interfaces)",
-    )
-    declare_translator_input_prefix_cmd = DeclareLaunchArgument(
-        "translator_input_prefix",
-        default_value="/referee",
-        description="Input topic prefix for the referee topic translator",
     )
 
     bringup_cmd_group = GroupAction(
@@ -71,20 +58,6 @@ def generate_launch_description():
             PushRosNamespace(namespace=namespace),
             SetRemap("/tf", "tf"),
             SetRemap("/tf_static", "tf_static"),
-            Node(
-                package="pb2025_sentry_behavior",
-                executable="referee_topic_translator.py",
-                name="referee_topic_translator",
-                output="screen",
-                condition=IfCondition(start_referee_translator),
-                parameters=[
-                    {
-                        "input_topic_prefix": translator_input_prefix,
-                        "output_topic_prefix": "referee",
-                    }
-                ],
-                arguments=["--ros-args", "--log-level", log_level],
-            ),
             Node(
                 package="pb2025_sentry_behavior",
                 executable="pb2025_sentry_behavior_server",
@@ -111,7 +84,5 @@ def generate_launch_description():
     ld.add_action(declare_use_sim_time_cmd)
     ld.add_action(declare_params_file_cmd)
     ld.add_action(declare_log_level_cmd)
-    ld.add_action(declare_start_referee_translator_cmd)
-    ld.add_action(declare_translator_input_prefix_cmd)
     ld.add_action(bringup_cmd_group)
     return ld

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4">
+  <BehaviorTree ID="referee_connection_test">
+    <Repeat num_cycles="-1">
+      <Sequence>
+        <PrintRefereeStatus raw_performance="{@referee_raw_performance}"/>
+        <Sleep msec="1000"/>
+      </Sequence>
+    </Repeat>
+  </BehaviorTree>
+</root>
