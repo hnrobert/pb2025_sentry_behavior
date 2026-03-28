@@ -7,6 +7,8 @@
                     min_remain_time="0"
                     expected_game_progress="4"
                     key_port="{@referee_gameStatus}"/>
+      <IsManualStart key_port="{@manual_start}"
+                     start_value="1"/>
       <ForceFailure>
         <Sequence>
           <PublishSpinSpeed spin_speed="0.0"

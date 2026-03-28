@@ -84,10 +84,16 @@ class RealityRefereeBridge(Node):
         self.buff_msg = Buff()
         self.ground_robot_position_msg = GroundRobotPosition()
 
-        self._takeover_serial_port()
-        self._setup_pty()
-        self._open_serial()
-        self._relaunch_referee_node()
+        try:
+            self._takeover_serial_port()
+            self._setup_pty()
+            self._open_serial()
+            self._relaunch_referee_node()
+        except Exception:
+            self.get_logger().fatal("Init failed, cleaning up acquired resources")
+            self._emergency_cleanup()
+            raise
+
         self._create_publishers()
 
         period = 1.0 / self.publish_rate_hz if self.publish_rate_hz > 0.0 else 0.1
@@ -354,6 +360,39 @@ class RealityRefereeBridge(Node):
                 self.robot_status_msg.is_hp_deduced = False
                 self.damage_latched = False
 
+    def _emergency_cleanup(self) -> None:
+        """Clean up resources acquired during __init__ when construction fails mid-way."""
+        if hasattr(self, "referee_proc") and self.referee_proc is not None:
+            try:
+                os.killpg(os.getpgid(self.referee_proc.pid), signal.SIGTERM)
+                self.referee_proc.wait(timeout=5)
+            except Exception:
+                try:
+                    os.killpg(os.getpgid(self.referee_proc.pid), signal.SIGKILL)
+                except Exception:
+                    pass
+        if hasattr(self, "serial_normal") and self.serial_normal.is_open:
+            self.serial_normal.close()
+        if hasattr(self, "pty_master_fd"):
+            try:
+                os.close(self.pty_master_fd)
+            except OSError:
+                pass
+        if hasattr(self, "pty_slave_fd"):
+            try:
+                os.close(self.pty_slave_fd)
+            except OSError:
+                pass
+        pty_path = Path(self.pty_path)
+        if pty_path.exists() or pty_path.is_symlink():
+            pty_path.unlink()
+        if self.service_was_stopped and self.manage_service:
+            subprocess.run(
+                ["sudo", "systemctl", "start", "ros2-dji-referee.service"],
+                capture_output=True, text=True, timeout=10,
+            )
+            self.get_logger().info("Restarted ros2-dji-referee.service after init failure")
+
     def destroy_node(self) -> bool:
         self.running = False
         if self.referee_proc is not None:
@@ -390,13 +429,18 @@ class RealityRefereeBridge(Node):
 
 def main(args=None) -> None:
     rclpy.init(args=args)
-    node = RealityRefereeBridge()
+    node = None
     try:
+        node = RealityRefereeBridge()
         rclpy.spin(node)
     except KeyboardInterrupt:
         pass
+    except Exception as ex:
+        logger = rclpy.logging.get_logger("reality_referee_bridge_main")
+        logger.fatal(f"Fatal error: {ex}")
     finally:
-        node.destroy_node()
+        if node is not None:
+            node.destroy_node()
         if rclpy.ok():
             rclpy.shutdown()
 

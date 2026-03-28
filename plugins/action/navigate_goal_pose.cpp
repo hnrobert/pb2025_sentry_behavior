@@ -31,7 +31,14 @@ BT::PortsList NavigateGoalPoseAction::providedPorts()
 
 BT::NodeStatus NavigateGoalPoseAction::onStart()
 {
-  return BT::RosTopicPubStatefulActionNode<geometry_msgs::msg::PoseStamped>::onStart();
+  auto status = BT::RosTopicPubStatefulActionNode<geometry_msgs::msg::PoseStamped>::onStart();
+  // Always return RUNNING: this node uses its own arrival check in onRunning(),
+  // not the base class duration mechanism.
+  if(status == BT::NodeStatus::FAILURE)
+  {
+    return BT::NodeStatus::FAILURE;
+  }
+  return BT::NodeStatus::RUNNING;
 }
 
 bool NavigateGoalPoseAction::setMessage(geometry_msgs::msg::PoseStamped & msg)
